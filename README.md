@@ -1,4 +1,4 @@
-# Level.Travel checkout prototypes
+# Checkout UX prototypes
 
 Desktop UX-test prototypes, variants B and C.
 
