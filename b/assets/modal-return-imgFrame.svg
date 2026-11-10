@@ -1,0 +1,7 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="20" height="128" viewBox="0 0 20 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Frame">
+<circle id="Ellipse" cx="10" cy="10" r="3" fill="white" stroke-width="2" stroke="#FF611D"/>
+<circle id="Ellipse_2" cx="10" cy="96" r="3" fill="white" stroke-width="2" stroke="#FF611D"/>
+<line id="Line" x1="10" y1="13" x2="10" y2="92" stroke-width="2" stroke="#FF611D"/>
+</g>
+</svg>

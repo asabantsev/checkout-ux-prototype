@@ -1,0 +1,33 @@
+.lodging-item[data-lodging-info]{width:100%;text-align:left;font-size:inherit;line-height:inherit}
+.lodging-item[data-lodging-info]:hover strong{color:var(--orange)}
+.lodging-info-modal{border:0;border-radius:8px;padding:24px;width:700px;max-width:700px;max-height:calc(100vh - 48px);overflow:auto;margin:auto;color:#000;background:white;font:inherit;box-sizing:border-box}
+.lodging-info-modal::backdrop{background:rgba(0,0,0,.4)}
+.lodging-info-content{display:flex;flex-direction:column;gap:16px;width:652px}
+.lodging-info-content h2{font-size:22px;line-height:26px;font-weight:500;padding-right:20px}
+.lodging-info-content p{font-size:16px;line-height:20px}
+.lodging-info-heading{display:flex;flex-direction:column;gap:4px}
+.lodging-stars{display:flex;gap:2px}
+.lodging-star{width:16px;height:16px}
+.lodging-gallery{position:relative;width:652px;height:212px;overflow:hidden}
+.lodging-photo-track{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;width:100%}
+.lodging-info-photo{width:212px;height:212px;object-fit:cover;border-radius:8px}
+.lodging-gallery-arrow{position:absolute;top:50%;transform:translateY(-50%);width:30px;height:68px;display:flex;align-items:center;justify-content:center}
+.lodging-gallery-arrow.previous{left:0}.lodging-gallery-arrow.next{right:0}
+.lodging-gallery-chevron{width:14px;height:52px}
+.lodging-gallery-arrow.previous img{transform:scaleX(-1)}
+.lodging-rating{display:flex;gap:8px;align-items:center;font-size:14px;line-height:16px}
+.lodging-rating strong{background:var(--lime);padding:6px 12px;border-radius:8px;font-weight:500}
+.lodging-hotel-badges{display:flex;flex-wrap:wrap;gap:8px;font-size:14px;line-height:16px}
+.lodging-hotel-badges>span{display:flex;gap:4px;align-items:center;background:var(--background);border-radius:8px;padding:6px 12px 6px 8px;white-space:nowrap}
+.lodging-hotel-badges>span.reviews-year{padding-left:12px;padding-right:10px}
+.lodging-hotel-badges>span.hotel-territory{padding-left:12px}
+.lodging-small-icon{width:16px;height:16px}
+.lodging-amenity-section{display:flex;flex-direction:column;gap:8px}
+.lodging-amenity-section h3{font-size:16px;line-height:20px;font-weight:500}
+.lodging-amenity-columns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.lodging-amenity-columns>div{display:flex;flex-direction:column;gap:8px;min-width:0}
+.lodging-amenity{display:flex;gap:8px;align-items:center;font-size:16px;line-height:20px;min-width:0}
+.lodging-amenity span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lodging-amenity-icon{width:24px;height:24px}
+.lodging-info-close{position:absolute;right:16px;top:16px;width:32px;height:32px;padding:8px;background:var(--background);border-radius:8px;display:flex;align-items:center;justify-content:center}
+.lodging-close-icon{width:16px;height:16px}
