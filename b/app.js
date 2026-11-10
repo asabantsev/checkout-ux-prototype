@@ -252,7 +252,7 @@ function summaryFlight(f, back) {
   const ctx = back ? 'summary-return' : 'summary-outbound';
   const hand = back ? f.handBack : f.handOut;
   const added = state.flightExtras[f.id][back ? 'baggageBack' : 'baggageOut'];
-  return `<div class="summary-flight"><div class="summary-airline">${airlineImage(back ? f.back : f.outbound,'summary-airline-logo')}<div><strong>${back ? f.back : f.outbound === 'S7' ? 'S7 Airlines' : f.outbound}</strong><p class="muted">Регулярный рейс ${back ? f.backNumber : f.outboundNumber} · Эконом · ${back && f.transfer ? '1 пересадка' : 'Прямой'} · ${back ? f.backDuration : '5 ч 10 м'} в пути</p></div></div><div class="summary-flight-row">${img(ctx,'imgPlane','icon')}<div><strong>${back ? f.backTime : f.outTime}, ${back ? '20' : '13'} ноя, пт</strong><p class="muted">${back ? 'Анталья, Анталья, AYT' : 'Москва, '+f.outAirport}</p></div></div>${back && f.transfer ? `<div class="summary-flight-row">${img(ctx,'imgFrame','icon')}<div><strong>Пересадка, ${f.transfer}</strong><p class="muted">Стамбул, Сабиха Гёкчен, SAW</p></div></div>` : ''}<div class="summary-flight-row">${img(ctx,'imgPlane1','icon')}<div><strong>${back ? f.backArrival : f.outArrival}, ${back ? f.backNextDay ? '21 ноя, сб' : '20 ноя, пт' : '13 ноя, пт'}</strong><p class="muted">${back ? 'Москва, '+f.backAirport : 'Анталья, Анталья, AYT'}</p></div></div><div class="summary-flight-row">${img(ctx,'imgCabin','icon')}<div><strong>Ручная кладь${hand ? ' '+hand : ''}</strong><p class="muted">1 место${hand ? ' до '+hand+'/чел.' : '/чел.'}${!back && hand ? ' не более 55x40x23 см' : ''}</p></div></div><div class="summary-flight-row ${added ? '' : 'pale'}">${img(ctx,'imgLuggage','icon')}<strong>${added ? 'Багаж 20 кг' : 'Багажа нет'}</strong></div></div>`;
+  return `<div class="summary-flight"><div class="summary-airline">${airlineImage(back ? f.back : f.outbound,'summary-airline-logo')}<div><strong>${back ? f.back : f.outbound === 'S7' ? 'S7 Airlines' : f.outbound}</strong><p class="muted">Регулярный рейс ${back ? f.backNumber : f.outboundNumber} · Эконом · ${back && f.transfer ? '1 пересадка' : 'Прямой'} · ${back ? f.backDuration : '5 ч 10 м'} в пути</p></div></div><div class="summary-flight-row">${img(ctx,'imgPlane','icon')}<div><strong>${back ? f.backTime : f.outTime}, ${back ? '20' : '13'} ноя, пт</strong><p class="muted">${back ? 'Анталья, Анталья, AYT' : 'Москва, '+f.outAirport}</p></div></div>${back && f.transfer ? `<div class="summary-flight-row">${img(ctx,'imgFrame','icon')}<div><strong>Пересадка, ${f.transfer}</strong><p class="muted">Стамбул, Сабиха Гёкчен, SAW</p></div></div>` : ''}<div class="summary-flight-row">${img(ctx,'imgPlane1','icon')}<div><strong>${back ? f.backArrival : f.outArrival}, ${back ? f.backNextDay ? '21 ноя, сб' : '20 ноя, пт' : '13 ноя, пт'}</strong><p class="muted">${back ? 'Москва, '+f.backAirport : 'Анталья, Анталья, AYT'}</p></div></div><div class="summary-flight-row">${img(ctx,'imgCabin','icon')}<div><strong>Ручная кладь${hand ? ' '+hand : ''}</strong><p class="muted">1 место${hand ? ' до '+hand+'/чел.' : '/чел.'}${!back && hand ? ' не более 55x40x23 см' : ''}</p></div></div><div class="summary-flight-row ${added ? '' : 'pale'}">${added?img(back?'modal-return':'modal-outbound','imgLuggage1','icon'):img(ctx,'imgLuggage','icon')}<strong>${added ? 'Багаж 20 кг' : 'Багажа нет'}</strong></div></div>`;
 }
 function touristsSummary() {
   return state.tourists.map(t=>`<div class="summary-person"><strong>${esc([t.firstName,t.lastName].filter(Boolean).join(' '))}</strong><p class="muted">${[t.gender ? t.gender === 'male' ? 'Муж.' : 'Жен.' : '',t.birth,t.passport,t.expiry].filter(Boolean).map(esc).join(' · ')}</p></div>`).join('');
@@ -269,6 +269,13 @@ function priceTimerText() {
   return String(Math.floor(seconds/60)).padStart(2,'0')+':'+String(seconds%60).padStart(2,'0');
 }
 function timer() { return `<p class="price-timer">${icon('imgClock')}<span>Проверка цены через <span data-timer>${priceTimerText()}</span></span></p>`; }
+function modalPriceBreakdown(f) {
+  const extras=state.flightExtras[f.id],rows=[['Стоимость тура',f.price]];
+  if(extras.baggageOut)rows.push(['Багаж на перелёт туда',4590]);
+  if(extras.baggageBack)rows.push(['Багаж на перелёт обратно',4590]);
+  if(extras.privateTransfer)rows.push(['Индивидуальный трансфер',quotedTransfer(f)]);
+  return `<div class="price-rows">${rows.map(([label,price])=>`<div><span class="muted">${label}</span><strong>${money(price)}</strong></div>`).join('')}</div>`;
+}
 function summary({ modalFlight = null } = {}) {
   const f = modalFlight || selectedFlight(state), t = totals(state), isModal = !!modalFlight;
   let sections = summarySection('tour','Тур',summaryTour(f,isModal),true) + summarySection('accommodation','Проживание',lodging(true),isModal);
@@ -278,7 +285,7 @@ function summary({ modalFlight = null } = {}) {
     if (ui.step === 3) sections += summarySection('additional','Дополнительно',additionalSummary());
   }
   const modalTotal = quote(f);
-  sections += summarySection('price','Стоимость',isModal ? `<div class="price-rows"><div><span class="muted">Стоимость тура</span><strong>${money(f.price)}</strong></div><div><span class="muted">Доплаты и сборы</span><strong>${money(modalTotal-f.price)}</strong></div></div>` : priceBreakdown(t),isModal);
+  sections += summarySection('price','Стоимость',isModal ? modalPriceBreakdown(f) : priceBreakdown(t),isModal);
   const total = isModal ? modalTotal : t.total;
   const action = isModal ? 'choose-flight' : ui.step === 1 ? 'booking-next' : 'services-next';
   const label = isModal ? 'Начать бронирование' : ui.step === 1 ? 'Дальше' : 'Перейти к оплате';
@@ -399,7 +406,7 @@ function modalLeg(f,back) {
   const connection=back&&f.transfer;
   const routeSegment=(start,end,origin,originAirport,destination,destinationAirport,duration,segmentDate=date)=>`<div class="modal-route"><div class="route-track">${img(ctx,'imgFrame')}</div><div class="route-stops"><div><strong>${start}</strong><strong>${origin}</strong><span>${segmentDate}</span><span>${originAirport}</span></div><p class="muted">${duration} в полете</p><div><strong>${end}</strong><strong>${destination}</strong><span>${back&&f.backNextDay?'21 ноя, сб':segmentDate}</span><span>${destinationAirport}</span></div></div></div>`;
   return `<section class="panel modal-flight-leg"><div><h2>Перелёт ${back?'обратно':'туда'}</h2><p class="muted">${connection?'1 пересадка':'Прямой'} · ${back?f.backDuration:'5 ч 10 м'} в пути</p></div>${connection?routeSegment(startTime,'10:55','Анталья','Анталья, AYT','Стамбул','Сабиха Гёкчен, SAW','1 ч 20 м')+`<div class="modal-connection">${img(ctx,'imgFrame1','icon')}<strong>Пересадка, ${f.transfer}</strong></div>`+routeSegment('12:15',finishTime,'Стамбул','Сабиха Гёкчен, SAW','Москва',f.backAirport,'5 ч 10 м'):routeSegment(startTime,finishTime,back?'Анталья':'Москва',back?'Анталья, AYT':f.outAirport,back?'Москва':'Анталья',back?f.backAirport:'Анталья, AYT',back?f.backDuration:'5 ч 10 м')}
-  <div class="modal-flight-features"><div>${airlineImage(airline,'icon')}<strong>${airline==='S7'?'S7 Airlines':airline}</strong></div><div>${img(ctx,'imgPlane','icon')}<strong>Регулярный рейс ${back?f.backNumber:f.outboundNumber}</strong></div><div>${img(ctx,back?'imgFrame2':'imgFrame1','icon')}<strong>Класс: Эконом</strong></div><div>${img(ctx,'imgCabin','icon')}<div><strong>Ручная кладь${hand?' '+hand:''}</strong><p class="muted">1 место${hand?' до '+hand+'/чел.':'/чел.'}${!back&&hand?' не более 55x40x23 см':''}</p></div></div><div class="${e[back?'baggageBack':'baggageOut']?'':'pale'}">${img(ctx,'imgLuggage','icon')}<strong>${e[back?'baggageBack':'baggageOut']?'Багаж 20 кг':'Багажа нет'}</strong></div></div><div class="modal-baggage">${img(ctx,'imgLuggage1','icon')}<strong>Добавить багаж</strong><strong class="push-right">+ 4 590 ₽</strong>${switchButton(e[back?'baggageBack':'baggageOut'],'modal-baggage','Багаж '+(back?'обратно':'туда'),`data-id="${f.id}" data-direction="${back?'baggageBack':'baggageOut'}"`)}</div></section>`;
+  <div class="modal-flight-features"><div>${airlineImage(airline,'icon')}<strong>${airline==='S7'?'S7 Airlines':airline}</strong></div><div>${img(ctx,'imgPlane','icon')}<strong>Регулярный рейс ${back?f.backNumber:f.outboundNumber}</strong></div><div>${img(ctx,back?'imgFrame2':'imgFrame1','icon')}<strong>Класс: Эконом</strong></div><div>${img(ctx,'imgCabin','icon')}<div><strong>Ручная кладь${hand?' '+hand:''}</strong><p class="muted">1 место${hand?' до '+hand+'/чел.':'/чел.'}${!back&&hand?' не более 55x40x23 см':''}</p></div></div><div class="${e[back?'baggageBack':'baggageOut']?'':'pale'}">${img(ctx,e[back?'baggageBack':'baggageOut']?'imgLuggage1':'imgLuggage','icon')}<strong>${e[back?'baggageBack':'baggageOut']?'Багаж 20 кг':'Багажа нет'}</strong></div></div><div class="modal-baggage">${img(ctx,'imgLuggage1','icon')}<strong>Добавить багаж</strong><strong class="push-right">+ 4 590 ₽</strong>${switchButton(e[back?'baggageBack':'baggageOut'],'modal-baggage','Багаж '+(back?'обратно':'туда'),`data-id="${f.id}" data-direction="${back?'baggageBack':'baggageOut'}"`)}</div></section>`;
 }
 function modal() {
   if (!ui.modal) return '';
@@ -414,6 +421,7 @@ function successPage() {
 }
 function render() {
   if(ui.success){document.title='Заказ оплачен — Level.Travel';app.innerHTML=`<div class="fixed-page">${header()}${successPage()}</div>`;document.body.classList.remove('modal-open');return;}
+  const modalScroll=document.querySelector('.tour-modal')?.scrollTop || 0;
   const focused=document.activeElement?.dataset.focus;
   const headings=[['Выберите перелёт','И начните бронирование тура онлайн'],['Бронирование','Заполните данные покупателя и туристов'],['Полезные услуги','Сделайте свой отдых более комфортным'],['Оплата','Осталось всё проверить и оплатить онлайн картой или в рассрочку']];
   document.title=STEPS[ui.step]+' — Level.Travel';
@@ -422,6 +430,7 @@ function render() {
   document.body.classList.toggle('modal-open',!!ui.modal);
   if(ui.modal) document.querySelector('dialog').showModal();
   if(focused) document.querySelector(`[data-focus="${CSS.escape(focused)}"]`)?.focus({preventScroll:true});
+  const tourDialog=document.querySelector('.tour-modal');if(tourDialog)tourDialog.scrollTop=modalScroll;
 }
 function updateSidebar() { const aside=document.querySelector('#order-sidebar'); if(aside) aside.innerHTML=summary(); }
 function setPath(path,value) { const keys=path.split('.');const last=keys.pop();const object=keys.reduce((o,k)=>o[k],state);object[last]=value; }
