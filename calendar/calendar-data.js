@@ -1,75 +1,15 @@
-/* Демонстрационные цены из макета 16262:52547. */
-window.CALENDAR_PRICES = {
-  "2027-01-05": {
-    "price": "143 730",
-    "low": false
-  },
-  "2027-01-06": {
-    "price": "199 507",
-    "low": false
-  },
-  "2027-01-07": {
-    "price": "172 615",
-    "low": false
-  },
-  "2027-01-08": {
-    "price": "136 279",
-    "low": false
-  },
-  "2027-01-09": {
-    "price": "117 689",
-    "low": false
-  },
-  "2027-01-10": {
-    "price": "116 026",
-    "low": false
-  },
-  "2027-01-11": {
-    "price": "116 026",
-    "low": false
-  },
-  "2027-01-12": {
-    "price": "116 026",
-    "low": false
-  },
-  "2027-01-13": {
-    "price": "117 689",
-    "low": false
-  },
-  "2027-01-14": {
-    "price": "115 644",
-    "low": false
-  },
-  "2027-01-15": {
-    "price": "118 876",
-    "low": false
-  },
-  "2027-01-16": {
-    "price": "121 055",
-    "low": false
-  },
-  "2027-01-17": {
-    "price": "106 326",
-    "low": false
-  },
-  "2027-01-18": {
-    "price": "91 751",
-    "low": true
-  },
-  "2027-01-19": {
-    "price": "108 816",
-    "low": false
-  },
-  "2027-01-20": {
-    "price": "97 019",
-    "low": false
-  },
-  "2027-01-21": {
-    "price": "92 366",
-    "low": true
-  },
-  "2027-01-22": {
-    "price": "110 855",
-    "low": false
-  }
-};
+/* Демонстрационные цены из макета 16262:52547.
+ * Повторяем образец для любых дат относительно стартового вылета.
+ * Опорная дата фиксируется при открытии страницы: выбор диапазона
+ * и переключение месяцев не меняют цену одного и того же дня.
+ */
+(() => {
+  const prices = [143730, 199507, 172615, 136279, 117689, 116026, 116026, 116026, 117689, 115644, 118876, 121055, 106326, 91751, 108816, 97019, 92366, 110855];
+  const dayNumber = value => Date.parse(value + 'T00:00:00Z') / 86400000;
+  window.getCalendarPrice = (value, referenceDate) => {
+    const offset = dayNumber(value) - dayNumber(referenceDate);
+    const index = ((offset + 5) % prices.length + prices.length) % prices.length;
+    const amount = prices[index];
+    return {price: String(amount).replace(/\B(?=(\d{3})+(?!\d))/g, ' '), low: amount < 95000};
+  };
+})();
