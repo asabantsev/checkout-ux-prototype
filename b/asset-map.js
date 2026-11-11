@@ -488,5 +488,8 @@ export const assets = {
     "imgChevronCompact": "./assets/lodging-room-imgChevronCompact.svg",
     "imgConditioner": "./assets/lodging-room-imgConditioner.svg",
     "imgXMark": "./assets/lodging-room-imgXMark.svg"
+  },
+  "modal-sticky-header": {
+    "imgXMark": "./assets/modal-sticky-header-imgXMark.svg"
   }
 };

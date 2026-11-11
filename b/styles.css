@@ -358,7 +358,7 @@ main{padding-top:32px;padding-bottom:150px}
 .paylate-provider>span{flex:1}
 .paylate-full-logo{width:58px;height:24px;flex-shrink:0}
 .stage-plans,.finance-terms{display:flex;gap:8px;width:100%}
-.stage-plan{flex:1;min-width:0;display:flex;flex-direction:column;gap:12px;padding:12px;border-radius:8px;background:var(--background);height:108px;font-size:14px;line-height:16px}
+.stage-plan{flex:1;min-width:0;display:flex;flex-direction:column;gap:12px;padding:12px;border-radius:8px;background:var(--background);min-height:116px;height:auto;font-size:14px;line-height:16px}
 .stage-plan strong{font-size:16px;line-height:20px;white-space:nowrap}
 .stage-plan>span:last-child{margin-top:auto}
 .stage-plan.selected,.finance-term.selected{background:#ffe6dd}
@@ -446,7 +446,7 @@ main{padding-top:32px;padding-bottom:150px}
 .route-stops{display:flex;flex-direction:column;gap:12px;flex:1}
 .route-stops>div{display:grid;grid-template-columns:80px 1fr;gap:2px 8px}
 .route-stops>div>span{color:var(--grey)}
-.route-stops>p{padding-left:88px}
+.route-stops>p{padding-left:0;text-align:left}
 .modal-connection{display:flex;align-items:center;gap:8px;padding:16px 0;background-image:url('./assets/modal-return-imgLine.svg'),url('./assets/modal-return-imgLine.svg');background-position:top left,bottom left;background-repeat:no-repeat}
 .modal-flight-features{padding-top:16px;display:flex;flex-direction:column;gap:16px;background:url('./assets/modal-outbound-imgLine.svg') top left no-repeat}
 .modal-flight-features>div:nth-child(4)>div{display:flex;flex-direction:column;gap:2px}
@@ -460,7 +460,7 @@ main{padding-top:32px;padding-bottom:150px}
 .private-transfer-choice>div{flex:1}
 .modal-transfer>div>div{display:flex;flex-direction:column;gap:2px}
 .private-transfer-choice>strong{white-space:nowrap}
-.private-transfer-choice .switch{align-self:center}
+.private-transfer-choice .switch{align-self:flex-start}
 .modal-open{overflow:hidden}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
 
@@ -469,3 +469,15 @@ main{padding-top:32px;padding-bottom:150px}
 .form-heading-row{display:flex;align-items:flex-start;gap:4px;width:100%}
 .form-heading-row h2{flex:1;margin:0}
 .clear-form{flex-shrink:0;background:var(--background);border-radius:8px;padding:5px 10px;font-size:14px;line-height:16px;font-weight:500;white-space:nowrap}
+
+/* Keep the funnel steps and close button visible while reading flight details. */
+.tour-modal-header{position:sticky;top:0;z-index:5;height:68px;margin:-24px -24px -20px;padding:24px 24px 20px;background:var(--background);box-sizing:border-box}
+.tour-modal.is-scrolled .tour-modal-header{background:#fff;border-bottom:1px solid var(--line)}
+.tour-modal.is-scrolled .tour-modal-header .step:not(.active){background:var(--background)}
+.tour-modal-header .modal-close{background:rgba(179,174,163,.16)}
+
+/* The visual radio is part of the full-width selectable button. */
+.method-row{position:relative}
+.method-row>.method-select{width:100%;align-self:stretch}
+.method-select>strong{flex:1;min-width:0;padding-right:30px}
+.method-row>.question-button{position:absolute;right:30px;top:50%;transform:translateY(-50%);z-index:1}

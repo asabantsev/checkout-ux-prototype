@@ -12,6 +12,8 @@ export const VEHICLES = [
   { name: 'Sedan Hyundai Elantra or Similar 2018', price: 2009 },
   { name: 'Minibus Toyota Hiace or Similar 2021', price: 2566 },
 ];
+export const CHEAPEST_VEHICLE_INDEX = VEHICLES.reduce((best, vehicle, index) => vehicle.price < VEHICLES[best].price ? index : best, 0);
+export const DEFAULT_TRANSFER_COST = VEHICLES[CHEAPEST_VEHICLE_INDEX].price * 2;
 export const FLIGHTS = [
   { id: 's7-pegasus', price: 189721, badge: 'Самый дешевый', outbound: 'S7', outboundNumber: 'S7 3739', outTime: '11:10', outArrival: '16:20', outAirport: 'Домодедово, DME', back: 'Pegasus Airlines', backNumber: 'PC 2003', backTime: '09:35', backArrival: '16:20', backAirport: 'Внуково, VKO', backDuration: '6 ч 45 м', transfer: '1 ч 20 мин', handOut: '10 кг', handBack: '3 кг', backNextDay: false },
   { id: 'pobeda', price: 190280, badge: 'Самый дешевый прямой', outbound: 'Победа', outboundNumber: 'DP 839', outTime: '07:00', outArrival: '12:10', outAirport: 'Внуково, VKO', back: 'Победа', backNumber: 'DP 840', backTime: '12:50', backArrival: '17:40', backAirport: 'Внуково, VKO', backDuration: '4 ч 50 м', transfer: '', handOut: '', handBack: '', backNextDay: false },
@@ -84,7 +86,7 @@ export function transferCost(services) {
   return [services.toHotel, services.toAirport].reduce((sum,index) => sum + (index === null ? 0 : VEHICLES[index].price), 0);
 }
 export function cardTotal(flight, extras, services) {
-  const transfer = extras.privateTransfer ? services ? transferCost(services) : 7764 : 0;
+  const transfer = extras.privateTransfer ? services ? transferCost(services) : DEFAULT_TRANSFER_COST : 0;
   return flight.price + baggageCost(extras) + transfer;
 }
 export function totals(state) {

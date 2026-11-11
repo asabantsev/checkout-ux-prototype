@@ -1,8 +1,8 @@
 import { installLodgingInfo } from './lodging-info.js?v=square-photos';
-import { assets } from './asset-map.js?v=square-photos';
+import { assets } from './asset-map.js?v=sticky-modal-header';
 import { PAYMENT_INFO } from './payment-info.js';
 import { FINANCE_DEFAULTS, FINANCE_METHODS, FINANCE_INFO, financeIcon, financeDetails } from './financing.js?v=complete';
-import { STEPS, ROUTES, FLIGHTS, PRESETS, VEHICLES, WISHES, COUNTRIES, DEMO_PROMO, priceCheckSeconds, transferSelected, sameDocument, presetOwner, freshState, selectedFlight, cardTotal, totals, matchingFlights, bookingErrors } from './model.js?v=price-countdown';
+import { STEPS, ROUTES, FLIGHTS, PRESETS, VEHICLES, CHEAPEST_VEHICLE_INDEX, DEFAULT_TRANSFER_COST, WISHES, COUNTRIES, DEMO_PROMO, priceCheckSeconds, transferSelected, sameDocument, presetOwner, freshState, selectedFlight, cardTotal, totals, matchingFlights, bookingErrors } from './model.js?v=cheapest-transfer';
 
 const KEY = 'level-travel-checkout-c-v1';
 let state = freshState();
@@ -45,7 +45,7 @@ function img(context, name, cls = '', alt = '', extra = '') {
   return `<img src="${src}" class="${cls}" alt="${esc(alt)}" ${extra}>`;
 }
 const icon = (name, cls = '') => img('booking-summary', name, `icon ${cls}`);
-const quotedTransfer = f => f.id===state.selected&&state.services.transfer ? totals(state).additions.filter(([label])=>label.startsWith('Индивидуальный трансфер')).reduce((sum,[,price])=>sum+price,0) : 7764;
+const quotedTransfer = f => f.id===state.selected&&transferSelected(state.services) ? totals(state).additions.filter(([label])=>label.startsWith('Индивидуальный трансфер')).reduce((sum,[,price])=>sum+price,0) : DEFAULT_TRANSFER_COST;
 const quote = f => cardTotal(f,state.flightExtras[f.id],f.id===state.selected?state.services:undefined);
 const chevron = (open = false) => img('booking-summary', 'imgChevron', `chevron ${open ? 'up' : ''}`);
 const pending = name => `data-pending="${esc(name)}"`;
@@ -360,8 +360,13 @@ function afterPaymentPanel() {
   ];
   return `<section class="after-payment-panel"><button type="button" class="after-payment" data-action="after-payment" data-focus="after-payment" aria-expanded="${open}" aria-controls="after-payment-content"><span class="after-payment-icon">${img('after-payment','imgImage','after-payment-image')}</span><strong>Что будет после оплаты?</strong>${img('after-payment',open?'imgChevron1':'imgChevron','chevron')}</button><div id="after-payment-content" class="after-payment-content" ${open?'':'hidden'}>${details.map(([asset,cls,title,description])=>`<div class="after-payment-detail"><span class="after-detail-icon ${cls}">${img('after-payment',asset)}</span><div class="after-detail-copy"><h3>${title}</h3><p>${description}</p></div></div>`).join('')}</div></section>`;
 }
+function paymentMethodRow(id,label,logo,selected,finance=false) {
+  const action=finance?'finance-method':'payment-method';
+  const focus=finance?'finance-method-':'method-';
+  return `<div class="method-row"><button type="button" class="method-select" data-action="${action}" data-method="${id}" data-focus="${focus}${id}" role="radio" aria-checked="${selected}" tabindex="${selected?0:-1}"><span class="payment-logo">${logo}</span><strong>${label}</strong><span class="method-radio ${selected?'checked':''}" aria-hidden="true"></span></button><button type="button" class="question-button" aria-label="${finance?'О варианте: ':'О способе оплаты '}${label}" data-action="${finance?'finance-info':'payment-info'}" data-method="${id}" data-focus="${finance?'finance-info-':'payment-info-'}${id}">${img(finance?'financing-0':'payment-methods','imgQuestion')}</button></div>`;
+}
 function financingMethods() {
-  return FINANCE_METHODS.map(([id,label])=>`<div class="payment-method finance-method"><div class="method-row"><button type="button" class="method-select" role="radio" aria-checked="${state.finance.method===id}" tabindex="${state.finance.method===id?0:-1}" data-action="finance-method" data-method="${id}" data-focus="finance-method-${id}"><span class="payment-logo">${financeIcon(id,img)}</span><strong>${label}</strong></button><button type="button" class="question-button" aria-label="О варианте: ${label}" data-action="finance-info" data-method="${id}" data-focus="finance-info-${id}">${img('financing-0','imgQuestion')}</button><span class="method-radio ${state.finance.method===id?'checked':''}" aria-hidden="true"></span></div>${state.finance.method===id?`<div class="finance-extra">${financeDetails(id,state.finance,totals(state).total,img,money)}</div>`:''}</div>`).join('');
+  return FINANCE_METHODS.map(([id,label])=>`<div class="payment-method finance-method">${paymentMethodRow(id,label,financeIcon(id,img),state.finance.method===id,true)}${state.finance.method===id?`<div class="finance-extra">${financeDetails(id,state.finance,totals(state).total,img,money)}</div>`:''}</div>`).join('');
 }
 function paymentPage() {
   const t=totals(state);
@@ -369,7 +374,7 @@ function paymentPage() {
   const methods = [
     ['sbp','СБП','payment-methods','imgSbp1','pay-logo'],['card','Картой','pay-card','imgPaymentType','pay-logo'],['ruble','Цифровым рублём','pay-ruble','imgDigitalRuble','pay-logo'],['tbank','T-Pay','pay-tbank','imgTBank','pay-logo wide'],['alfa','AlfaPay','pay-alfa','imgGroup','pay-logo alfa-main'],['yandex','Картой любого банка с Яндекс Пэй','pay-yandex','imgYandex','pay-logo wide'],['sber','SberPay','pay-sber','imgFrame','pay-logo wide'],
   ];
-  const paymentMethods=methods.map(([id,label,context,asset,cls])=>`<div class="payment-method"><div class="method-row" data-action="payment-method" data-method="${id}"><button type="button" class="method-select" data-action="payment-method" data-method="${id}" data-focus="method-${id}" role="radio" aria-checked="${ui.paymentMethod===id}" tabindex="${ui.paymentMethod===id?0:-1}"><span class="payment-logo">${img(context,asset,cls)}${id==='alfa'?img('pay-alfa','imgGroup1','alfa-overlay'):''}</span><strong>${label}</strong></button><button type="button" class="question-button" aria-label="О способе оплаты ${label}" data-action="payment-info" data-method="${id}" data-focus="payment-info-${id}">${img('payment-methods','imgQuestion')}</button><span class="method-radio ${ui.paymentMethod===id?'checked':''}" aria-hidden="true"></span></div>${id==='card'&&ui.paymentMethod==='card'?`<div class="bank-card-form"><div class="bank-card-intro"><div><strong>Безопасная оплата</strong><p class="muted">Защищено AES-256 шифрованием, используемым банками и государствами</p></div>${img('payment-methods','imgGroup2','card-brands')}</div>${cardField('number','Номер карты',23)}<div class="card-input-row">${cardField('expiry','Срок до',5)}${cardField('code','CVC / CVV',3)}</div></div>`:''}</div>`).join('');
+  const paymentMethods=methods.map(([id,label,context,asset,cls])=>`<div class="payment-method">${paymentMethodRow(id,label,img(context,asset,cls)+(id==='alfa'?img('pay-alfa','imgGroup1','alfa-overlay'):''),ui.paymentMethod===id)}${id==='card'&&ui.paymentMethod==='card'?`<div class="bank-card-form"><div class="bank-card-intro"><div><strong>Безопасная оплата</strong><p class="muted">Защищено AES-256 шифрованием, используемым банками и государствами</p></div>${img('payment-methods','imgGroup2','card-brands')}</div>${cardField('number','Номер карты',23)}<div class="card-input-row">${cardField('expiry','Срок до',5)}${cardField('code','CVC / CVV',3)}</div></div>`:''}</div>`).join('');
   return `<div class="checkout-layout payment-layout"><div class="main-column">${points}${afterPaymentPanel()}<section class="payment-panel payment-methods"><h3>Способ оплаты</h3><div class="tabs" role="tablist" aria-label="Вариант оплаты"><button type="button" class="tab ${ui.paymentTab==='now'?'selected':''}" role="tab" aria-selected="${ui.paymentTab==='now'}" data-action="payment-tab" data-tab="now" data-focus="payment-tab-now">${img(ui.paymentTab==='now'?'payment-methods':'financing-0',ui.paymentTab==='now'?'imgPaymentType1':'imgPaymentType2','tab-icon')}Оплата сейчас</button><button type="button" class="tab ${ui.paymentTab==='installments'?'selected':''}" role="tab" aria-selected="${ui.paymentTab==='installments'}" data-action="payment-tab" data-tab="installments" data-focus="payment-tab-installments">${img(ui.paymentTab==='installments'?'financing-0':'payment-methods',ui.paymentTab==='installments'?'imgPaymentType3':'imgPaymentType2','tab-icon')}Рассрочка или кредит</button></div><div class="method-list ${ui.paymentTab==='installments'?'finance-methods':''}" role="radiogroup" aria-label="Способ оплаты">${ui.paymentTab==='installments'?financingMethods():paymentMethods}</div></section><button type="button" class="button primary" data-action="pay">Оплатить ${money(t.total)}</button><p class="payment-agreement">Нажимая кнопку «Оплатить» я подтверждаю, что принимаю условия ${['договора оферты тура','договора оферты дополнительных услуг','пользовательского соглашения'].map(l=>`<a href="#" class="text-link inline" data-excluded="legal-document">${l}</a>`).reduce((text,part,i)=>text+(i?(i===2?' и ':', '):'')+part,'')}, ознакомлен с <a href="#" class="text-link inline" data-excluded="legal-document">правилами изменения и отмены бронирования</a>, понимаю условия чартерных перевозок и что время и/или аэропорт вылета могут быть изменены, осведомлён о правилах въезда и поведения в стране отдыха, проинформирован о документах и требованиях, предъявляемых к документам, необходимым для потребления услуг, в том числе, необходимых для въезда в страну временного пребывания, проинформирован о традициях и возможных опасностях и даю согласие на обработку моих персональных данных и их передачу</p></div><aside id="order-sidebar" class="order-sidebar">${summary()}</aside></div>`;
 }
 function modalLeg(f,back) {
@@ -388,7 +393,7 @@ function modal() {
   const info=ui.modal?.startsWith('payment-info-')?PAYMENT_INFO[ui.modal.slice(13)]:ui.modal?.startsWith('finance-info-')?FINANCE_INFO[ui.modal.slice(13)]:null;
   if(info)return `<dialog class="payment-info-modal" aria-labelledby="payment-info-title"><div class="modal-pane"><button type="button" class="modal-close" data-action="close-modal" aria-label="Закрыть информацию о способе оплаты">${img('sbp-tooltip','imgXMark')}</button><h2 id="payment-info-title">${esc(info.title)}</h2><p>${esc(info.text)}</p></div></dialog>`;
   const f=FLIGHTS.find(f=>f.id===ui.modal), e=state.flightExtras[f.id];
-  return `<dialog class="tour-modal" aria-labelledby="tour-modal-title"><div class="modal-pane"><button type="button" class="modal-close" data-action="close-modal" aria-label="Закрыть детали тура">${img('flight-filters','imgXMark')}</button>${steps(0)}<div class="page-heading"><h1 id="tour-modal-title">Детали тура</h1><p>№ 368175269</p></div><div class="modal-layout"><div class="main-column">${modalLeg(f,false)}${modalLeg(f,true)}<section class="panel modal-transfer"><h2>Трансфер</h2><div>${img('modal-transfer','imgTransfer','icon')}<div><strong>Групповой трансфер включен</strong><p class="muted">Аэропорт – отель – аэропорт. От аэропорта до отеля около 1 ч 23 мин</p></div></div><div class="private-transfer-choice">${img('modal-transfer','imgPrivateTransfer','icon')}<div><strong>Добавить индивидуальный трансфер</strong><p class="muted">Быстрее, комфортнее и безопаснее группового. Идеально для поездки с ребенком</p></div><strong>+ ${money(quotedTransfer(f))}</strong>${switchButton(e.privateTransfer,'flight-transfer','Индивидуальный трансфер в деталях',`data-id="${f.id}"`)}</div></section></div><aside class="order-sidebar">${summary({modalFlight:f})}</aside></div></div></dialog>`;
+  return `<dialog class="tour-modal" aria-labelledby="tour-modal-title"><div class="modal-pane"><div class="tour-modal-header"><button type="button" class="modal-close" data-action="close-modal" aria-label="Закрыть детали тура">${img('modal-sticky-header','imgXMark')}</button>${steps(0)}</div><div class="page-heading"><h1 id="tour-modal-title">Детали тура</h1><p>№ 368175269</p></div><div class="modal-layout"><div class="main-column">${modalLeg(f,false)}${modalLeg(f,true)}<section class="panel modal-transfer"><h2>Трансфер</h2><div>${img('modal-transfer','imgTransfer','icon')}<div><strong>Групповой трансфер включен</strong><p class="muted">Аэропорт – отель – аэропорт. От аэропорта до отеля около 1 ч 23 мин</p></div></div><div class="private-transfer-choice">${img('modal-transfer','imgPrivateTransfer','icon')}<div><strong>Добавить индивидуальный трансфер</strong><p class="muted">Быстрее, комфортнее и безопаснее группового. Идеально для поездки с ребенком</p></div><strong>+ ${money(quotedTransfer(f))}</strong>${switchButton(e.privateTransfer,'flight-transfer','Индивидуальный трансфер в деталях',`data-id="${f.id}"`)}</div></section></div><aside class="order-sidebar">${summary({modalFlight:f})}</aside></div></div></dialog>`;
 }
 function successPage() {
   return `<main class="success-page"><nav class="steps" aria-label="Этапы бронирования">${STEPS.map((label,i)=>`${i?'<span class="step-divider" aria-hidden="true">/</span>':''}<button type="button" class="step done" data-action="step" data-step="${i}">${img('payment-success',i===3?'imgCheckMark1':'imgCheckMark','done-mark')}${label}</button>`).join('')}</nav><div class="success-copy"><div class="success-check">${img('payment-success','imgImage')}</div><h1 tabindex="-1">Заказ на сумму ${money(state.paymentResult.total)} оплачен!</h1><p>Мы начали бронировать ваш тур. Обычно информация о подтверждении поступает в течение 2 часов после оплаты. В редких случаях ожидание может занять до 72 часов . Сообщим о подтверждении бронирования по смс и e-mail . Готовые документы отправим на ваш e-mail. Также они будут доступны в личном кабинете</p></div><button type="button" class="button primary" data-excluded="order-page">Перейти к заказу</button></main>`;
@@ -450,7 +455,10 @@ function render() {
   document.body.classList.toggle('modal-open',!!ui.modal);
   if(ui.modal) document.querySelector('dialog').showModal();
   if(focused) document.querySelector(`[data-focus="${CSS.escape(focused)}"]`)?.focus({preventScroll:true});
-  const tourDialog=document.querySelector('.tour-modal');if(tourDialog)tourDialog.scrollTop=modalScroll;
+  const tourDialog=document.querySelector('.tour-modal');if(tourDialog){
+    const updateHeader=()=>tourDialog.classList.toggle('is-scrolled',tourDialog.scrollTop>0);
+    tourDialog.addEventListener('scroll',updateHeader,{passive:true});tourDialog.scrollTop=modalScroll;updateHeader();
+  }
   if(ui.step===1&&!ui.modal)updateProgress();
 }
 function updateSidebar() { const aside=document.querySelector('#order-sidebar'); if(aside){const scroll=aside.scrollTop;aside.innerHTML=combinedSidebar();aside.scrollTop=scroll;} updateProgress(); }
@@ -459,7 +467,7 @@ function chooseFlight(id) {
   const changed=state.selected!==id;
   state.selected=id;
   state.services.transfer=state.flightExtras[id].privateTransfer;
-  if(changed&&state.services.transfer){state.services.toHotel=0;state.services.toAirport=0;}
+  if(changed&&state.services.transfer){state.services.toHotel=CHEAPEST_VEHICLE_INDEX;state.services.toAirport=CHEAPEST_VEHICLE_INDEX;}
   state.visited=Math.max(state.visited,1);save();navigate(1);
 }
 function closeModal(){ui.modal=null;render();if(modalTrigger)document.querySelector(`[data-focus="${CSS.escape(modalTrigger)}"]`)?.focus({preventScroll:true});}
@@ -510,7 +518,7 @@ app.addEventListener('click',event=>{
   if(action==='dismiss-banner'){ui.banner=false;render();return;}
   if(action==='flight-transfer'){
     const e=state.flightExtras[id];e.privateTransfer=!e.privateTransfer;
-    if(state.selected===id){state.services.transfer=e.privateTransfer;if(e.privateTransfer){state.services.toHotel??=0;state.services.toAirport??=0;}}
+    if(state.selected===id){state.services.transfer=e.privateTransfer;if(e.privateTransfer){state.services.toHotel=CHEAPEST_VEHICLE_INDEX;state.services.toAirport=CHEAPEST_VEHICLE_INDEX;}}
   } else if(action==='flight-baggage'){
     const e=state.flightExtras[id];const next=!(e.baggageOut&&e.baggageBack);e.baggageOut=next;e.baggageBack=next;
   } else if(action==='modal-baggage'){
