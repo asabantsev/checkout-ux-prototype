@@ -5,3 +5,5 @@
 .card-photo>img{object-fit:fill}
 
 .matrix-option[aria-checked=true] .radio{background:var(--orange);border:0;width:18px;height:18px}
+
+.importance-label{width:100%}.importance-label h3{font-size:14px;line-height:16px;font-weight:500}
