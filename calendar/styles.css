@@ -8,3 +8,10 @@
 .empty-departure-icon{position:absolute;right:12px;top:20px;width:16px;height:16px;pointer-events:none}.empty-departure-icon img{width:16px;height:16px}
 
 .date-cell:disabled:hover{background:#fff}
+
+
+.direct-info img{width:16px;height:16px}
+
+.calendar-footer.calendar-toolbar{border-top:0;border-bottom:1px solid var(--line)}
+
+.direct-controls label{cursor:pointer}
